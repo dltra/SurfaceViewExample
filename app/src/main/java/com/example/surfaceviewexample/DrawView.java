@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -14,6 +15,8 @@ public class DrawView extends SurfaceView implements Runnable{
     private Thread mGameThread = null;
     private SurfaceHolder mSurfaceHolder;
     private Context mContext;
+    int x = 0;
+    Paint mPaint = new Paint();
     public DrawView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
@@ -26,8 +29,6 @@ public class DrawView extends SurfaceView implements Runnable{
         long frameStartTime;
         long frameTime;
         final int FPS = 60;
-        Paint mPaint = new Paint();
-        mPaint.setColor(Color.RED);
         while (mRunning) {
             if (mSurfaceHolder == null){return;}
             // If valid drawing surface...
@@ -42,8 +43,8 @@ public class DrawView extends SurfaceView implements Runnable{
                     canvas.drawARGB(255, 0, 0, 0);
                     try {
                         // Your drawing here
-                        canvas.drawRect(0, 0, getWidth() / 2, getHeight() / 2, mPaint);
-                    } finally {  //unlock and release canvas
+                        drawMe(canvas);
+                       } finally {  //unlock and release canvas
                         canvas.restore();
                         mSurfaceHolder.unlockCanvasAndPost(canvas);
                     }
@@ -59,6 +60,10 @@ public class DrawView extends SurfaceView implements Runnable{
                 }
             }
         }
+    }
+    private void drawMe(Canvas canvas) {//replaces the onDraw() from previous drawing lab
+        mPaint.setColor(Color.RED);
+        canvas.drawRect(x++, 0, getWidth() / 2, getHeight() / 2, mPaint);
     }
     /**
      * Called by MainActivity.onPause() to stop the thread.
@@ -79,5 +84,12 @@ public class DrawView extends SurfaceView implements Runnable{
         mRunning = true;
         mGameThread = new Thread(this);
         mGameThread.start();
+    }
+    @Override  //resets x to 0 on touch
+    public boolean onTouchEvent(MotionEvent event) {
+        if(event.getAction()==MotionEvent.ACTION_DOWN){
+            x = 0;
+        }
+        return true;
     }
 }
